@@ -17,6 +17,6 @@ public sealed class PostgresWebApplicationFactory : WebApplicationFactory<Progra
         builder.UseEnvironment("IntegrationTests");
         builder.UseSetting("ConnectionStrings:DefaultConnection", _postgres.ConnectionString);
         builder.UseSetting("ConnectionStrings:Redis", string.Empty);
-        builder.UseSetting("Auth:OtpRequestCooldownSeconds", "0");
+        builder.UseSetting("Auth:OtpRequestCooldownSeconds", "1");
     }
 }

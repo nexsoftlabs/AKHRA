@@ -55,10 +55,11 @@ public sealed class OtpAuthService(
 
         await smsSender.SendAsync(phone, $"Your verification code is {code}", cancellationToken);
 
+        var cooldownSeconds = Math.Max(1, options.OtpRequestCooldownSeconds);
         await cache.SetStringAsync(
             cooldownKey,
             "1",
-            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(options.OtpRequestCooldownSeconds) },
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(cooldownSeconds) },
             cancellationToken);
 
         await cache.SetStringAsync(
@@ -111,16 +112,20 @@ public sealed class OtpAuthService(
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phone, cancellationToken);
         if (user is null)
         {
+            var otpEmail = $"otp+{phone.TrimStart('+')}@phone.akhra.local";
             user = new ApplicationUser
             {
                 UserName = phone,
+                Email = otpEmail,
+                NormalizedEmail = otpEmail.ToUpperInvariant(),
+                EmailConfirmed = false,
                 PhoneNumber = phone,
                 PhoneNumberConfirmed = true,
                 IsPhoneVerified = true,
                 CreatedAt = DateTimeOffset.UtcNow
             };
 
-            var create = await userManager.CreateAsync(user);
+            var create = await userManager.CreateAsync(user, $"Otp-{Guid.NewGuid():N}!aA1");
             if (!create.Succeeded)
             {
                 return AuthResult.Fail("registration_failed", string.Join("; ", create.Errors.Select(e => e.Description)));
