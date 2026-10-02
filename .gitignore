@@ -34,6 +34,7 @@ test-results/
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+!**/terraform.tfvars.example
 
 # Media / uploads (local dev)
 uploads/

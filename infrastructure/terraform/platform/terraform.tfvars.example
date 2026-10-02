@@ -1,0 +1,22 @@
+# Copy to terraform.tfvars (never commit) or pass via GitHub Actions secrets as TF_VAR_*.
+
+project_name    = "akhra"
+github_repo_url = "https://github.com/nexsoftlabs/AKHRA"
+github_branch   = "main"
+
+render_owner_id = "tea-davvg1qjnfac73da8vu0"
+render_region   = "singapore"
+render_plan     = "starter"
+# render_api_key  = set via env RENDER_API_KEY or TF_VAR_render_api_key
+
+# vercel_api_token = set via TF_VAR_vercel_api_token
+# vercel_team_id   = optional Nexsoft Vercel team id
+
+supabase_project_ref = "hauyxvckfhwegjjyqclc"
+# supabase_db_password  = TF_VAR_supabase_db_password
+
+# jwt_signing_key = long random string (64+ chars)
+
+# public_web_base_url = "https://akhra-ui.vercel.app"  # set after first Vercel deploy if custom domain
+# google_client_id    = ""
+# redis_connection_string = ""  # optional; API uses memory cache if empty

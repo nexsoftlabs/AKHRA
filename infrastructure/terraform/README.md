@@ -1,5 +1,8 @@
-# Terraform (Phase 8)
+# Terraform
 
-Planned modules: VPC, RDS PostgreSQL, ElastiCache Redis, private S3, SQS, MediaConvert IAM, CloudFront with OAC, ECS/Fargate or App Runner for API/worker, Secrets Manager, CloudWatch alarms.
+| Stack | Path | Purpose |
+|-------|------|---------|
+| **Platform** | [`platform/`](platform/) | **Render API**, **Vercel UI**, **Supabase DB** wiring + CI (`/.github/workflows/deploy.yml`) |
+| **AWS media** | [`aws/`](aws/) | S3 + CloudFront for HLS (Phase 8) |
 
-See `main.tf` and `variables.tf` for S3 media bucket and RDS PostgreSQL (baseline). Extend with VPC, ECS, CloudFront, and Redis for full production.
+Start with `platform/README.md` for production deploy.

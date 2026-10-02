@@ -1,0 +1,101 @@
+name: Deploy (Terraform)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/terraform/platform/**'
+      - 'Dockerfile'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: akhra-platform-terraform
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Platform (API / UI / DB wiring)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/platform
+
+    env:
+      TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
+      TF_VAR_render_owner_id: ${{ secrets.RENDER_OWNER_ID }}
+      TF_VAR_vercel_api_token: ${{ secrets.VERCEL_API_TOKEN }}
+      TF_VAR_vercel_team_id: ${{ secrets.VERCEL_TEAM_ID }}
+      TF_VAR_supabase_db_password: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      TF_VAR_jwt_signing_key: ${{ secrets.JWT_SIGNING_KEY }}
+      TF_VAR_google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
+      TF_VAR_razorpay_key_id: ${{ secrets.RAZORPAY_KEY_ID }}
+      TF_VAR_razorpay_key_secret: ${{ secrets.RAZORPAY_KEY_SECRET }}
+      TF_VAR_public_web_base_url: ${{ secrets.VERCEL_PRODUCTION_URL }}
+      TF_VAR_database_connection_string: ${{ secrets.DATABASE_CONNECTION_STRING }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore Terraform state
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-state-akhra-platform
+          path: infrastructure/terraform/platform
+        continue-on-error: true
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform apply
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Save Terraform state
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-state-akhra-platform
+          path: infrastructure/terraform/platform/terraform.tfstate
+          retention-days: 90
+
+      - name: Deployment summary
+        if: github.ref == 'refs/heads/main'
+        run: |
+          terraform output -json > outputs.json
+          echo "### Terraform outputs" >> "$GITHUB_STEP_SUMMARY"
+          cat outputs.json >> "$GITHUB_STEP_SUMMARY"
+
+  # App binaries deploy via Render/Vercel Git integration after services exist.
+  build-verify:
+    name: Verify build (pre-deploy gate)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build backend/MoviePlatform.Api -c Release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend

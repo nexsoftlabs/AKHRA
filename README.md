@@ -50,6 +50,16 @@ dotnet test
 cd frontend && npm run build
 ```
 
+## Deploy (Render + Vercel + Supabase)
+
+Terraform and GitHub Actions live under [`infrastructure/terraform/platform/`](infrastructure/terraform/platform/README.md):
+
+- **API** → Render (Docker, `main`)
+- **UI** → Vercel (`frontend/`)
+- **DB** → Supabase Postgres (connection string on Render)
+
+Add repository secrets listed in the platform README, then push to `main` or run the **Deploy (Terraform)** workflow.
+
 ## External credentials (not in repo)
 
 - **Razorpay (buy flow):** Create a [test mode](https://razorpay.com/docs/payments/payments/test-card-upi-details/) account. Set `Razorpay__KeyId` and `Razorpay__KeySecret` on the API (see `.env.example`), restart the API, sign in, then **Buy now** on a movie. Payment is verified server-side (signature + Razorpay API) before an entitlement is granted. Optional: `Razorpay__WebhookSecret` for `POST /api/v1/checkout/webhooks/razorpay`.
