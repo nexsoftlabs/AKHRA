@@ -34,7 +34,6 @@ jobs:
   terraform:
     name: Platform (API / UI / DB wiring)
     needs: terraform-validate
-    if: ${{ secrets.RENDER_API_KEY != '' && secrets.VERCEL_API_TOKEN != '' && secrets.SUPABASE_DB_PASSWORD != '' && secrets.JWT_SIGNING_KEY != '' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -56,7 +55,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check deploy secrets
+        id: deploy
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          JWT_SIGNING_KEY: ${{ secrets.JWT_SIGNING_KEY }}
+        run: |
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$VERCEL_API_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ] || [ -z "$JWT_SIGNING_KEY" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Deploy secrets missing — skipping terraform plan/apply. See infrastructure/terraform/platform/README.md"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Restore Terraform state
+        if: steps.deploy.outputs.ready == 'true'
         uses: actions/download-artifact@v4
         with:
           name: terraform-state-akhra-platform
@@ -64,21 +79,24 @@ jobs:
         continue-on-error: true
 
       - uses: hashicorp/setup-terraform@v3
+        if: steps.deploy.outputs.ready == 'true'
         with:
           terraform_version: 1.9.8
 
       - name: Terraform init
+        if: steps.deploy.outputs.ready == 'true'
         run: terraform init -input=false
 
       - name: Terraform plan
+        if: steps.deploy.outputs.ready == 'true'
         run: terraform plan -input=false -out=tfplan
 
       - name: Terraform apply
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        if: steps.deploy.outputs.ready == 'true' && github.ref == 'refs/heads/main'
         run: terraform apply -input=false -auto-approve tfplan
 
       - name: Save Terraform state
-        if: github.ref == 'refs/heads/main'
+        if: steps.deploy.outputs.ready == 'true' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: terraform-state-akhra-platform
@@ -86,13 +104,12 @@ jobs:
           retention-days: 90
 
       - name: Deployment summary
-        if: github.ref == 'refs/heads/main'
+        if: steps.deploy.outputs.ready == 'true' && github.ref == 'refs/heads/main'
         run: |
           terraform output -json > outputs.json
           echo "### Terraform outputs" >> "$GITHUB_STEP_SUMMARY"
           cat outputs.json >> "$GITHUB_STEP_SUMMARY"
 
-  # App binaries deploy via Render/Vercel Git integration after services exist.
   build-verify:
     name: Verify build (pre-deploy gate)
     runs-on: ubuntu-latest

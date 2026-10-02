@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.Extensions.Hosting;
 
 namespace MoviePlatform.Api.Security;
 
@@ -32,6 +33,12 @@ public static class AntiforgeryExtensions
 
     public static IApplicationBuilder UseApiAntiforgery(this IApplicationBuilder app)
     {
-        return app.UseMiddleware<AntiforgeryValidationMiddleware>();
+        return app.UseWhen(
+            static context =>
+            {
+                var env = context.RequestServices.GetRequiredService<IHostEnvironment>();
+                return !env.IsEnvironment("Testing") && !env.IsEnvironment("IntegrationTests");
+            },
+            static branch => branch.UseMiddleware<AntiforgeryValidationMiddleware>());
     }
 }
