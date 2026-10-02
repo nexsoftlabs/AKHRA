@@ -17,7 +17,7 @@ resource "vercel_project" "ui" {
 resource "vercel_project_environment_variable" "api_base_url" {
   project_id = vercel_project.ui.id
   key        = "VITE_API_BASE_URL"
-  value      = try(render_web_service.api.url, render_web_service.api.service_details_url, "https://${var.project_name}-api.onrender.com")
+  value      = coalesce(render_web_service.api.url, "https://${var.project_name}-api.onrender.com")
   target     = ["production", "preview", "development"]
 }
 

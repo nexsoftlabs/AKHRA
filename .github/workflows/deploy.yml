@@ -17,8 +17,24 @@ permissions:
   contents: read
 
 jobs:
+  terraform-validate:
+    name: Terraform validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - run: terraform init -backend=false
+      - run: terraform validate
+
   terraform:
     name: Platform (API / UI / DB wiring)
+    needs: terraform-validate
+    if: ${{ secrets.RENDER_API_KEY != '' && secrets.VERCEL_API_TOKEN != '' && secrets.SUPABASE_DB_PASSWORD != '' && secrets.JWT_SIGNING_KEY != '' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -53,9 +69,6 @@ jobs:
 
       - name: Terraform init
         run: terraform init -input=false
-
-      - name: Terraform validate
-        run: terraform validate
 
       - name: Terraform plan
         run: terraform plan -input=false -out=tfplan
