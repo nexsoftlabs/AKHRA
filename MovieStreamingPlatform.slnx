@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/MoviePlatform.Api/MoviePlatform.Api.csproj" />
+    <Project Path="backend/MoviePlatform.Application/MoviePlatform.Application.csproj" />
+    <Project Path="backend/MoviePlatform.Domain/MoviePlatform.Domain.csproj" />
+    <Project Path="backend/MoviePlatform.Infrastructure/MoviePlatform.Infrastructure.csproj" />
+    <Project Path="backend/MoviePlatform.Tests/MoviePlatform.Tests.csproj" />
+    <Project Path="backend/MoviePlatform.Worker/MoviePlatform.Worker.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-MoviePlatform.Worker-a1b5c373-6947-4f23-a1ec-0258141d01e7</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MoviePlatform.Application\MoviePlatform.Application.csproj" />
+    <ProjectReference Include="..\MoviePlatform.Infrastructure\MoviePlatform.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

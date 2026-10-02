@@ -1,0 +1,40 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.DotSettings.user
+
+# Node
+node_modules/
+dist/
+*.local
+
+# Secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+**/secrets.json
+
+# IDE
+.idea/
+.DS_Store
+
+# Test / coverage
+TestResults/
+coverage/
+playwright-report/
+test-results/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# Media / uploads (local dev)
+uploads/
+*.log
