@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.Extensions.Hosting;
+using MoviePlatform.Infrastructure.Security;
 
 namespace MoviePlatform.Api.Security;
 
@@ -8,15 +9,17 @@ public static class AntiforgeryExtensions
     public const string HeaderName = "X-XSRF-TOKEN";
     public const string CookieName = "XSRF-TOKEN";
 
-    public static IServiceCollection AddSpaAntiforgery(this IServiceCollection services)
+    public static IServiceCollection AddSpaAntiforgery(this IServiceCollection services, IHostEnvironment environment)
     {
+        var crossOriginSpa = CrossSiteCookiePolicy.IsCrossOriginSpa(environment);
         services.AddAntiforgery(options =>
         {
             options.HeaderName = HeaderName;
             options.Cookie.Name = CookieName;
             options.Cookie.HttpOnly = false;
             options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-            options.Cookie.SameSite = SameSiteMode.Strict;
+            options.Cookie.SameSite = crossOriginSpa ? SameSiteMode.None : SameSiteMode.Strict;
+            CrossSiteCookiePolicy.Apply(options.Cookie, crossOriginSpa);
         });
         return services;
     }

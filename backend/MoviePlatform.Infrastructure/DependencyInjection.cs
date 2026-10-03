@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,7 @@ using MoviePlatform.Infrastructure.Finance;
 using MoviePlatform.Domain.Identity;
 using MoviePlatform.Infrastructure.Identity;
 using MoviePlatform.Infrastructure.Persistence;
+using MoviePlatform.Infrastructure.Security;
 
 namespace MoviePlatform.Infrastructure;
 
@@ -24,7 +26,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment? environment = null)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
@@ -39,7 +42,13 @@ public static class DependencyInjection
                 })
                 .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
 
+        var crossOriginSpa = environment is not null && CrossSiteCookiePolicy.IsCrossOriginSpa(environment);
+
         services.Configure<AuthOptions>(configuration.GetSection(AuthOptions.SectionName));
+        if (environment is not null)
+        {
+            services.PostConfigure<AuthOptions>(o => o.CrossOriginSpa = crossOriginSpa);
+        }
         services.Configure<RazorpayOptions>(configuration.GetSection(RazorpayOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.Configure<SmsOptions>(configuration.GetSection(SmsOptions.SectionName));
@@ -68,6 +77,7 @@ public static class DependencyInjection
             options.Cookie.HttpOnly = true;
             options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.Cookie.SameSite = SameSiteMode.Lax;
+            CrossSiteCookiePolicy.Apply(options.Cookie, crossOriginSpa);
             options.SlidingExpiration = true;
             options.ExpireTimeSpan = TimeSpan.FromHours(
                 configuration.GetValue<int?>("Auth:AccessCookieHours") ?? 8);

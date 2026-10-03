@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using MoviePlatform.Application.Identity;
 using MoviePlatform.Domain.Identity;
 using MoviePlatform.Infrastructure.Persistence;
+using MoviePlatform.Infrastructure.Security;
 
 namespace MoviePlatform.Infrastructure.Identity;
 
@@ -117,12 +118,17 @@ public sealed class SessionService(
             BuildCookieOptions(httpContext, expires));
     }
 
-    private static CookieOptions BuildCookieOptions(HttpContext httpContext, DateTimeOffset expires) => new()
+    private CookieOptions BuildCookieOptions(HttpContext httpContext, DateTimeOffset expires)
     {
-        HttpOnly = true,
-        Secure = httpContext.Request.IsHttps,
-        SameSite = SameSiteMode.Lax,
-        Expires = expires,
-        Path = "/api/v1/auth"
-    };
+        var options = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = httpContext.Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            Expires = expires,
+            Path = "/api/v1/auth",
+        };
+        CrossSiteCookiePolicy.Apply(options, authOptions.Value.CrossOriginSpa);
+        return options;
+    }
 }

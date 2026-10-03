@@ -17,7 +17,11 @@ export async function ensureCsrfToken() {
 
 const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+async function apiFetchOnce<T>(
+  path: string,
+  init?: RequestInit,
+  csrfRetry = false,
+): Promise<Response> {
   const method = (init?.method ?? 'GET').toUpperCase()
   const headers = new Headers(init?.headers)
 
@@ -26,15 +30,29 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   }
 
   if (unsafeMethods.has(method)) {
+    if (csrfRetry) {
+      resetCsrfToken()
+    }
     const token = await ensureCsrfToken()
     headers.set('X-XSRF-TOKEN', token)
   }
 
-  const response = await fetch(`${apiBase}${path}`, {
+  return fetch(`${apiBase}${path}`, {
     ...init,
     credentials: 'include',
     headers,
   })
+}
+
+export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  let response = await apiFetchOnce(path, init)
+
+  if (!response.ok && response.status === 400) {
+    const body = (await response.clone().json().catch(() => ({}))) as { error?: string }
+    if (body.error === 'invalid_csrf' && unsafeMethods.has((init?.method ?? 'GET').toUpperCase())) {
+      response = await apiFetchOnce(path, init, true)
+    }
+  }
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as {

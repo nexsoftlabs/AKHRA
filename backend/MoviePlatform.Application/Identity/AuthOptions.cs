@@ -12,4 +12,9 @@ public class AuthOptions
     public int OtpRequestCooldownSeconds { get; set; } = 60;
     public int OtpMaxRequestsPerHourPerPhone { get; set; } = 5;
     public string RefreshCookieName { get; set; } = "mp.refresh";
+
+    /// <summary>
+    /// When true, auth-related cookies use SameSite=None so a SPA on another origin can send credentials.
+    /// </summary>
+    public bool CrossOriginSpa { get; set; }
 }

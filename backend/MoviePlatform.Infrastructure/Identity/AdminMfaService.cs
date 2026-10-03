@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MoviePlatform.Application.Authorization;
+using MoviePlatform.Application.Identity;
 using MoviePlatform.Domain.Identity;
+using MoviePlatform.Infrastructure.Security;
 
 namespace MoviePlatform.Infrastructure.Identity;
 
@@ -18,7 +20,8 @@ public sealed class AdminMfaOptions
 
 public sealed class AdminMfaService(
     UserManager<ApplicationUser> userManager,
-    IOptions<AdminMfaOptions> options)
+    IOptions<AdminMfaOptions> options,
+    IOptions<AuthOptions> authOptions)
 {
     private static readonly string[] AdminRoles =
     [
@@ -110,17 +113,16 @@ public sealed class AdminMfaService(
 
     public void IssueStepUpCookie(HttpContext httpContext)
     {
-        httpContext.Response.Cookies.Append(
-            options.Value.CookieName,
-            "verified",
-            new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = httpContext.Request.IsHttps,
-                SameSite = SameSiteMode.Strict,
-                MaxAge = TimeSpan.FromHours(options.Value.StepUpHours),
-                Path = "/",
-            });
+        var cookie = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = httpContext.Request.IsHttps,
+            SameSite = SameSiteMode.Strict,
+            MaxAge = TimeSpan.FromHours(options.Value.StepUpHours),
+            Path = "/",
+        };
+        CrossSiteCookiePolicy.Apply(cookie, authOptions.Value.CrossOriginSpa);
+        httpContext.Response.Cookies.Append(options.Value.CookieName, "verified", cookie);
     }
 
     private async Task<ApplicationUser?> GetUserAsync(ClaimsPrincipal principal)

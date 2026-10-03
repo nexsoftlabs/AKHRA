@@ -32,9 +32,9 @@ try
             .WriteTo.Console());
 
     builder.Services.AddApplication();
-    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
     builder.Services.AddHostedService<SubscriptionRazorpayPlanSync>();
-    builder.Services.AddSpaAntiforgery();
+    builder.Services.AddSpaAntiforgery(builder.Environment);
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<IAuthorizationHandler, AdminMfaHandler>();
 
