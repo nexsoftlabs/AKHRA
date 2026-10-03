@@ -12,8 +12,10 @@ public record UploadSessionDto(
 
 public record PlaybackStartDto(
     string SessionToken,
-    string ManifestUrl,
-    DateTimeOffset ExpiresAt);
+    DateTimeOffset ExpiresAt,
+    string PlaybackType,
+    string? ManifestUrl,
+    string? VimeoVideoId);
 
 public record LibraryItemDto(
     Guid MovieId,

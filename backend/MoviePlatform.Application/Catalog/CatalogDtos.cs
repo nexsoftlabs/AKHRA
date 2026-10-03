@@ -32,4 +32,5 @@ public record MovieDetailDto(
     bool SubscriptionEligible,
     bool IsFeatured,
     IReadOnlyList<string> Genres,
-    bool HasAccess);
+    bool HasAccess,
+    string? VimeoVideoId);

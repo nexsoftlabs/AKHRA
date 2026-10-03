@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { login } from '@/lib/auth'
+import { resetCsrfToken } from '@/lib/api'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -16,7 +17,10 @@ export function LoginPage() {
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: () => {
+      resetCsrfToken()
       queryClient.invalidateQueries({ queryKey: ['me'] })
+      queryClient.removeQueries({ queryKey: ['playback'] })
+      queryClient.invalidateQueries({ queryKey: ['movie'] })
       navigate('/browse')
     },
   })

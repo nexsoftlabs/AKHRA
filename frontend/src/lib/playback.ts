@@ -3,8 +3,10 @@ import { apiFetch } from '@/lib/api'
 
 const playbackStartSchema = z.object({
   sessionToken: z.string(),
-  manifestUrl: z.string(),
-  expiresAt: z.string(),
+  expiresAt: z.union([z.string(), z.number()]).transform(String),
+  playbackType: z.enum(['hls', 'vimeo']),
+  manifestUrl: z.string().nullable().optional(),
+  vimeoVideoId: z.string().nullable().optional(),
 })
 
 const libraryItemSchema = z.object({

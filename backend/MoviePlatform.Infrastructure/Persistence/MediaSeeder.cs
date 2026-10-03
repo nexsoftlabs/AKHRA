@@ -12,7 +12,9 @@ public static class MediaSeeder
     {
         var moviesWithoutHls = await db.Movies
             .Include(m => m.MediaAssets)
-            .Where(m => !m.MediaAssets.Any(a => a.AssetType == MediaAssetType.HlsManifest && a.IsReady))
+            .Where(m =>
+                string.IsNullOrEmpty(m.VimeoVideoId) &&
+                !m.MediaAssets.Any(a => a.AssetType == MediaAssetType.HlsManifest && a.IsReady))
             .ToListAsync(cancellationToken);
 
         foreach (var movie in moviesWithoutHls)

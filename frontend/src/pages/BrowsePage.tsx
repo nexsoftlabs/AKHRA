@@ -22,14 +22,14 @@ export function BrowsePage() {
   })
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-      <header className="mb-10 max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Browse movies</h1>
+    <div className="mx-auto max-w-6xl px-3 py-8 sm:px-6 sm:py-14">
+      <header className="mb-8 max-w-2xl sm:mb-10">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-4xl">Browse movies</h1>
         <p className="mt-3 text-muted-foreground">
           Licensed titles available for rent or purchase. Streaming unlocks after verified payment.
         </p>
         <Input
-          className="mt-6 max-w-md"
+          className="mt-6 h-11 w-full max-w-md"
           placeholder="Search catalog…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -58,7 +58,7 @@ export function BrowsePage() {
       </header>
 
       {moviesQuery.isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="aspect-[2/3] animate-pulse rounded-2xl bg-muted" />
           ))}
@@ -72,7 +72,7 @@ export function BrowsePage() {
       )}
 
       {moviesQuery.data && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {moviesQuery.data.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />
           ))}

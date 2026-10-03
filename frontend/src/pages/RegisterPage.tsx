@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import { Lock, Mail, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,14 +7,22 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { resetCsrfToken } from '@/lib/api'
 import { register } from '@/lib/auth'
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: register,
-    onSuccess: () => navigate('/browse'),
+    onSuccess: () => {
+      resetCsrfToken()
+      queryClient.invalidateQueries({ queryKey: ['me'] })
+      queryClient.removeQueries({ queryKey: ['playback'] })
+      queryClient.invalidateQueries({ queryKey: ['movie'] })
+      navigate('/browse')
+    },
   })
 
   return (

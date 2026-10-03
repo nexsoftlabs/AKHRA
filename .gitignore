@@ -30,6 +30,7 @@ test-results/
 
 # Terraform
 **/.terraform/
+.akhra-migrate.sql
 *.tfstate
 *.tfstate.*
 *.tfvars

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/ui/glass-card'
 import { useMutation } from '@tanstack/react-query'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
-import { getMe, logout, resendEmailConfirmation } from '@/lib/auth'
+import { clearClientAuthState, getMe, logout, resendEmailConfirmation } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 
 export function AccountPage() {
@@ -138,8 +138,7 @@ export function AccountPage() {
             className="w-full"
             onClick={async () => {
               await logout()
-              queryClient.invalidateQueries({ queryKey: ['me'] })
-              meQuery.refetch()
+              clearClientAuthState(queryClient)
             }}
           >
             <LogOut className="size-4" />

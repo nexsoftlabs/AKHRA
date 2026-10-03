@@ -2,7 +2,7 @@ locals {
   db_connection = coalesce(
     var.database_connection_string,
     format(
-      "Host=db.%s.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=%s;SSL Mode=Require;Trust Server Certificate=true",
+      "Host=aws-0-ap-northeast-2.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.%s;Password=%s;SSL Mode=Require;Trust Server Certificate=true",
       var.supabase_project_ref,
       var.supabase_db_password,
     ),

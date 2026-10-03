@@ -61,9 +61,13 @@ try
     builder.Services.AddProblemDetails();
     builder.Services.AddOpenApi();
 
-    builder.Services.AddHealthChecks()
-        .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!)
-        .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379");
+    var healthChecks = builder.Services.AddHealthChecks()
+        .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
+    var redisConnection = builder.Configuration.GetConnectionString("Redis");
+    if (!string.IsNullOrWhiteSpace(redisConnection))
+    {
+        healthChecks.AddRedis(redisConnection);
+    }
 
     builder.Services.ConfigureHttpJsonOptions(options =>
     {

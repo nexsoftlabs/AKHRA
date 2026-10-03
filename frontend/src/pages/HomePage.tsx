@@ -46,7 +46,7 @@ export function HomePage() {
   const genreRows = useMemo(() => groupByPrimaryGenre(movies), [movies])
 
   return (
-    <div className="pb-20">
+    <div className="pb-6 md:pb-12">
       <HeroBillboard movie={heroDetailQuery.data} loading={moviesQuery.isLoading || heroDetailQuery.isLoading} />
 
       <div className="relative z-10 -mt-6 space-y-10 sm:-mt-10 sm:space-y-12">

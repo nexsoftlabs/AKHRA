@@ -17,6 +17,8 @@ public class Movie : AuditableEntity
     public string? PosterUrl { get; set; }
     public string? BackdropUrl { get; set; }
     public string? TrailerUrl { get; set; }
+    /// <summary>Vimeo numeric video id for in-app embed playback (player.vimeo.com).</summary>
+    public string? VimeoVideoId { get; set; }
     public long PriceMinorUnits { get; set; }
     public string Currency { get; set; } = "INR";
     public PurchaseType PurchaseType { get; set; } = PurchaseType.Lifetime;

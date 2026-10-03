@@ -25,7 +25,7 @@ export function MovieCard({ movie }: { movie: MovieListItem }) {
       {movie.isFeatured && (
         <Badge className="absolute left-3 top-3 border-0 bg-primary/90 text-primary-foreground">Featured</Badge>
       )}
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 transition group-hover:opacity-100">
+      <div className="absolute inset-0 flex items-center justify-center opacity-70 transition sm:opacity-0 sm:group-hover:opacity-100">
         <span className="flex size-12 items-center justify-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md">
           <Play className="size-5 fill-white" />
         </span>
@@ -34,7 +34,7 @@ export function MovieCard({ movie }: { movie: MovieListItem }) {
         <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-primary-foreground/90">
           {genre}
         </p>
-        <h3 className="mt-1 text-base font-semibold leading-snug">{movie.title}</h3>
+        <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug sm:text-base">{movie.title}</h3>
         <p className="mt-2 text-xs text-white/75">
           {movie.releaseYear ?? '—'} · {formatDuration(movie.durationSeconds)} ·{' '}
           <span className="font-medium text-white">{formatPrice(movie.priceMinorUnits, movie.currency)}</span>

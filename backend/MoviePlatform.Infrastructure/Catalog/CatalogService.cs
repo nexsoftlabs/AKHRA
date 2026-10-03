@@ -78,15 +78,22 @@ public sealed class CatalogService(MoviePlatformDbContext db) : ICatalogService
         var hasAccess = false;
         if (user?.Identity?.IsAuthenticated == true)
         {
-            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (Guid.TryParse(userIdClaim, out var userId))
+            if (FreeVimeoAccess.IsFreeVimeoTitle(movie))
             {
-                hasAccess = await AccessEvaluator.CanStreamMovieAsync(
-                    db,
-                    userId,
-                    movie.Id,
-                    movie.SubscriptionEligible,
-                    cancellationToken);
+                hasAccess = true;
+            }
+            else
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (Guid.TryParse(userIdClaim, out var userId))
+                {
+                    hasAccess = await AccessEvaluator.CanStreamMovieAsync(
+                        db,
+                        userId,
+                        movie.Id,
+                        movie.SubscriptionEligible,
+                        cancellationToken);
+                }
             }
         }
 
@@ -109,7 +116,8 @@ public sealed class CatalogService(MoviePlatformDbContext db) : ICatalogService
             movie.SubscriptionEligible,
             movie.IsFeatured,
             movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-            hasAccess);
+            hasAccess,
+            movie.VimeoVideoId);
     }
 
     public async Task<IReadOnlyList<string>> ListPublishedGenreSlugsAsync(CancellationToken cancellationToken)

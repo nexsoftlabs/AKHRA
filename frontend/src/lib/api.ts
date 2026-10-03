@@ -2,6 +2,10 @@ const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
 
 let csrfToken: string | null = null
 
+export function resetCsrfToken() {
+  csrfToken = null
+}
+
 export async function ensureCsrfToken() {
   if (csrfToken) return csrfToken
   const response = await fetch(`${apiBase}/api/v1/antiforgery/token`, { credentials: 'include' })

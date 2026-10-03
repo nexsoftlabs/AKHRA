@@ -22,6 +22,7 @@ public static class DbInitializer
 
         await SeedRolesAsync(scope.ServiceProvider);
         await SubscriptionSeeder.SeedAsync(db);
+        await VimeoCatalogBootstrap.EnsureAsync(db);
 
         if (!environment.IsDevelopment())
         {
@@ -30,7 +31,6 @@ public static class DbInitializer
 
         await SeedDevUserAsync(scope.ServiceProvider, logger);
         await SeedDevAdminAsync(scope.ServiceProvider, logger);
-        await CatalogSeeder.SeedAsync(db);
         var mediaOptions = scope.ServiceProvider.GetRequiredService<IOptions<MediaStorageOptions>>().Value;
         await MediaSeeder.SeedAsync(db, mediaOptions);
         logger.LogInformation("Development database migrated and roles seeded.");

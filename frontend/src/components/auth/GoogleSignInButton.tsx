@@ -1,6 +1,7 @@
 import { GoogleLogin } from '@react-oauth/google'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { resetCsrfToken } from '@/lib/api'
 import { googleSignIn, linkGoogle } from '@/lib/auth'
 import {
   isGoogleAuthEnabled,
@@ -67,7 +68,10 @@ function GoogleSignInButtonInner({
   const mutation = useMutation({
     mutationFn: intent === 'link' ? linkGoogle : googleSignIn,
     onSuccess: () => {
+      resetCsrfToken()
       queryClient.invalidateQueries({ queryKey: ['me'] })
+      queryClient.removeQueries({ queryKey: ['playback'] })
+      queryClient.invalidateQueries({ queryKey: ['movie'] })
       if (intent === 'link') {
         return
       }

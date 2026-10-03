@@ -23,6 +23,7 @@ export const movieDetailSchema = movieListItemSchema.extend({
   purchaseType: z.string(),
   subscriptionEligible: z.boolean(),
   hasAccess: z.boolean(),
+  vimeoVideoId: z.string().nullable().optional(),
 })
 
 export type MovieListItem = z.infer<typeof movieListItemSchema>

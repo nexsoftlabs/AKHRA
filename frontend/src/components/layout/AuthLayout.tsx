@@ -5,7 +5,7 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 export function AuthLayout() {
   return (
-    <div className="relative flex min-h-screen">
+    <div className="relative flex min-h-[100dvh] overflow-x-hidden">
       <CinemaBackground />
       <div className="hidden w-[44%] flex-col justify-between border-r border-border bg-muted/30 p-10 lg:flex xl:p-14">
         <Link to="/" className="flex items-center gap-2.5 text-foreground">
@@ -36,8 +36,8 @@ export function AuthLayout() {
         <p className="text-xs text-muted-foreground">Built for rights holders · India-first (INR)</p>
       </div>
 
-      <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-8">
-        <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
+      <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-10 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-12">
+        <div className="absolute right-4 top-[max(1rem,env(safe-area-inset-top))] sm:right-8 sm:top-8">
           <ThemeToggle />
         </div>
         <Link to="/" className="mb-8 flex items-center gap-2 lg:hidden">

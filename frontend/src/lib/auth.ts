@@ -1,5 +1,6 @@
+import type { QueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, resetCsrfToken } from '@/lib/api'
 
 export const registerSchema = z.object({
   email: z.string().email(),
@@ -64,6 +65,15 @@ export function getMe() {
 
 export function logout() {
   return authFetch<{ status: string }>('/api/v1/auth/logout', { method: 'POST' })
+}
+
+/** Clears cached session state so UI reflects signed-out immediately (preview caps, hasAccess, etc.). */
+export function clearClientAuthState(queryClient: QueryClient) {
+  resetCsrfToken()
+  queryClient.removeQueries({ queryKey: ['me'] })
+  queryClient.removeQueries({ queryKey: ['playback'] })
+  void queryClient.invalidateQueries({ queryKey: ['movie'] })
+  void queryClient.invalidateQueries({ queryKey: ['movies'] })
 }
 
 export function confirmEmail(email: string, token: string) {

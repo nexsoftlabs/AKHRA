@@ -44,7 +44,8 @@ public sealed class PlaybackService(
             return null;
         }
 
-        var entitled = await AccessEvaluator.CanStreamMovieAsync(
+        var freeVimeo = FreeVimeoAccess.IsFreeVimeoTitle(movie);
+        var entitled = freeVimeo || await AccessEvaluator.CanStreamMovieAsync(
             db,
             userId.Value,
             movie.Id,
@@ -52,16 +53,6 @@ public sealed class PlaybackService(
             cancellationToken);
 
         if (!entitled)
-        {
-            return null;
-        }
-
-        var manifest = movie.MediaAssets
-            .Where(a => a.AssetType == MediaAssetType.HlsManifest && a.IsReady)
-            .OrderByDescending(a => a.CreatedAt)
-            .FirstOrDefault();
-
-        if (manifest is null)
         {
             return null;
         }
@@ -80,6 +71,26 @@ public sealed class PlaybackService(
         });
         await db.SaveChangesAsync(cancellationToken);
 
+        if (!string.IsNullOrWhiteSpace(movie.VimeoVideoId))
+        {
+            return new PlaybackStartDto(
+                token,
+                expires,
+                "vimeo",
+                null,
+                movie.VimeoVideoId.Trim());
+        }
+
+        var manifest = movie.MediaAssets
+            .Where(a => a.AssetType == MediaAssetType.HlsManifest && a.IsReady)
+            .OrderByDescending(a => a.CreatedAt)
+            .FirstOrDefault();
+
+        if (manifest is null)
+        {
+            return null;
+        }
+
         var manifestUrl = ManifestUrlBuilder.ResolvePlaybackUrl(
             manifest.StorageKey,
             movie.Id,
@@ -88,7 +99,7 @@ public sealed class PlaybackService(
             cloudFront,
             expires);
 
-        return new PlaybackStartDto(token, manifestUrl, expires);
+        return new PlaybackStartDto(token, expires, "hls", manifestUrl, null);
     }
 
     public async Task<bool> ValidateSessionTokenAsync(string sessionToken, Guid movieId, CancellationToken cancellationToken) =>
