@@ -17,6 +17,6 @@ supabase_project_ref = "hauyxvckfhwegjjyqclc"
 
 # jwt_signing_key = long random string (64+ chars)
 
-# public_web_base_url = "https://akhra-ui.vercel.app"  # set after first Vercel deploy if custom domain
+# public_web_base_url = "https://akhra-ranchi.vercel.app"  # set after first Vercel deploy if custom domain
 # google_client_id    = ""
 # redis_connection_string = ""  # optional; API uses memory cache if empty

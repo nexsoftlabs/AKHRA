@@ -1,4 +1,18 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "akhra-ui.vercel.app" }],
+      "destination": "https://akhra-ranchi.vercel.app/:path*",
+      "statusCode": 308
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "akhra-ui-nexsoft-labs1.vercel.app" }],
+      "destination": "https://akhra-ranchi.vercel.app/:path*",
+      "statusCode": 308
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api/).*)",

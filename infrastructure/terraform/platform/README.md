@@ -24,7 +24,7 @@ Provisions:
 | `JWT_SIGNING_KEY` | Production JWT signing secret |
 | `GOOGLE_CLIENT_ID` | Optional Google Sign-In |
 | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | Optional payments |
-| `VERCEL_PRODUCTION_URL` | e.g. `https://akhra-ui.vercel.app` (for CORS + email links) |
+| `VERCEL_PRODUCTION_URL` | e.g. `https://akhra-ranchi.vercel.app` (for CORS + email links) |
 | `DATABASE_CONNECTION_STRING` | Optional override for full Npgsql string |
 
 Also install **Render** and **Vercel** GitHub apps on `nexsoftlabs/AKHRA` so auto-deploy works.

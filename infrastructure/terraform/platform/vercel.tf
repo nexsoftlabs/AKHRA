@@ -1,5 +1,5 @@
 resource "vercel_project" "ui" {
-  name      = "${var.project_name}-ui"
+  name      = "${var.project_name}-ranchi"
   framework = "vite"
 
   root_directory = "frontend"
