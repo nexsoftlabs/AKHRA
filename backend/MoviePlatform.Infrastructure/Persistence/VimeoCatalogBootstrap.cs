@@ -106,9 +106,6 @@ public static class VimeoCatalogBootstrap
             mock.IsFeatured = false;
         }
 
-        if (mockTitles.Count > 0)
-        {
-            await db.SaveChangesAsync(cancellationToken);
-        }
+        await db.SaveChangesAsync(cancellationToken);
     }
 }
