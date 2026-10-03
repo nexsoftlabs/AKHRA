@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using MoviePlatform.Api.Authorization;
 using MoviePlatform.Api.Endpoints;
 using MoviePlatform.Api.Security;
@@ -85,6 +86,13 @@ try
                 .AllowCredentials());
     });
 
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
+
     var app = builder.Build();
 
     if (!app.Environment.IsEnvironment("Testing"))
@@ -100,6 +108,7 @@ try
     }
 
     app.UseExceptionHandler();
+    app.UseForwardedHeaders();
     app.UseHttpsRedirection();
     app.UseCors("Frontend");
     app.UseAuthentication();
