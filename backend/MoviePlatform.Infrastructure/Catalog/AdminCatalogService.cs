@@ -92,6 +92,7 @@ public sealed partial class AdminCatalogService(MoviePlatformDbContext db) : IAd
             PosterUrl = request.PosterUrl,
             BackdropUrl = request.BackdropUrl,
             TrailerUrl = request.TrailerUrl,
+            VimeoVideoId = VimeoVideoIdNormalizer.Normalize(request.VimeoVideoId),
             PriceMinorUnits = request.PriceMinorUnits,
             Currency = request.Currency,
             PurchaseType = request.PurchaseType,
@@ -143,6 +144,7 @@ public sealed partial class AdminCatalogService(MoviePlatformDbContext db) : IAd
         movie.PosterUrl = request.PosterUrl;
         movie.BackdropUrl = request.BackdropUrl;
         movie.TrailerUrl = request.TrailerUrl;
+        movie.VimeoVideoId = VimeoVideoIdNormalizer.Normalize(request.VimeoVideoId);
         movie.PriceMinorUnits = request.PriceMinorUnits;
         movie.Currency = request.Currency;
         movie.PurchaseType = request.PurchaseType;
@@ -180,10 +182,12 @@ public sealed partial class AdminCatalogService(MoviePlatformDbContext db) : IAd
 
         var hasStream = movie.MediaAssets.Any(a =>
             a.AssetType == MediaAssetType.HlsManifest && a.IsReady);
+        var hasVimeo = !string.IsNullOrWhiteSpace(movie.VimeoVideoId);
 
-        if (!hasStream)
+        if (!hasStream && !hasVimeo)
         {
-            throw new InvalidOperationException("Movie requires a ready HLS manifest before publishing.");
+            throw new InvalidOperationException(
+                "Movie requires a ready HLS manifest or a Vimeo video id before publishing.");
         }
 
         movie.PublicationStatus = PublicationStatus.Published;
@@ -259,6 +263,7 @@ public sealed partial class AdminCatalogService(MoviePlatformDbContext db) : IAd
             movie.PosterUrl,
             movie.BackdropUrl,
             movie.TrailerUrl,
+            movie.VimeoVideoId,
             movie.PriceMinorUnits,
             movie.Currency,
             movie.PurchaseType,

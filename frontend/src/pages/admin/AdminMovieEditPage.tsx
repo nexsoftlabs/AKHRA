@@ -1,12 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { vimeoFieldToApiValue } from '@/lib/admin-vimeo'
 import { fetchAdminMovie, publishMovie, updateAdminMovie } from '@/lib/admin'
 
 export function AdminMovieEditPage() {
   const { id } = useParams<{ id: string }>()
   const queryClient = useQueryClient()
+  const [formError, setFormError] = useState<string | null>(null)
   const movieQuery = useQuery({
     queryKey: ['admin-movie', id],
     queryFn: () => fetchAdminMovie(id!),
@@ -45,7 +48,16 @@ export function AdminMovieEditPage() {
         className="mt-8 space-y-4"
         onSubmit={(e) => {
           e.preventDefault()
+          setFormError(null)
           const form = new FormData(e.currentTarget)
+          const vimeoRaw = String(form.get('vimeoVideoId') || '')
+          let vimeoVideoId: string | null = null
+          try {
+            vimeoVideoId = vimeoRaw ? vimeoFieldToApiValue(vimeoRaw) : null
+          } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Invalid Vimeo value.')
+            return
+          }
           saveMutation.mutate({
             title: String(form.get('title')),
             slug: String(form.get('slug')),
@@ -58,6 +70,7 @@ export function AdminMovieEditPage() {
             posterUrl: movie.posterUrl,
             backdropUrl: movie.backdropUrl,
             trailerUrl: movie.trailerUrl,
+            vimeoVideoId,
             priceMinorUnits: Number(form.get('priceMinorUnits')),
             currency: movie.currency,
             purchaseType: movie.purchaseType,
@@ -78,6 +91,16 @@ export function AdminMovieEditPage() {
         <Input name="genre" defaultValue={movie.genres[0] ?? 'drama'} />
         <Input name="durationSeconds" type="number" defaultValue={movie.durationSeconds} />
         <Input name="priceMinorUnits" type="number" defaultValue={movie.priceMinorUnits} />
+        <div>
+          <Input
+            name="vimeoVideoId"
+            defaultValue={movie.vimeoVideoId ?? ''}
+            placeholder="Vimeo id or URL"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            In-app stream uses this id. Clear the field to remove Vimeo playback.
+          </p>
+        </div>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" name="subscriptionEligible" defaultChecked={movie.subscriptionEligible} />
           Subscription eligible
@@ -101,6 +124,7 @@ export function AdminMovieEditPage() {
           )}
         </div>
       </form>
+      {formError && <p className="mt-4 text-sm text-destructive">{formError}</p>}
       {saveMutation.isSuccess && <p className="mt-4 text-sm text-primary">Saved.</p>}
       {saveMutation.isError && (
         <p className="mt-4 text-sm text-destructive">{(saveMutation.error as Error).message}</p>

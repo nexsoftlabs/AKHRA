@@ -1,11 +1,14 @@
 import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { vimeoFieldToApiValue } from '@/lib/admin-vimeo'
 import { createMovie } from '@/lib/admin'
 
 export function AdminMovieNewPage() {
   const navigate = useNavigate()
+  const [formError, setFormError] = useState<string | null>(null)
   const mutation = useMutation({
     mutationFn: createMovie,
     onSuccess: (movie) => navigate(`/admin/movies/${movie.id}`),
@@ -19,7 +22,16 @@ export function AdminMovieNewPage() {
         className="mt-8 space-y-4"
         onSubmit={(e) => {
           e.preventDefault()
+          setFormError(null)
           const form = new FormData(e.currentTarget)
+          const vimeoRaw = String(form.get('vimeoVideoId') || '')
+          let vimeoVideoId: string | null = null
+          try {
+            vimeoVideoId = vimeoRaw ? vimeoFieldToApiValue(vimeoRaw) : null
+          } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Invalid Vimeo value.')
+            return
+          }
           mutation.mutate({
             title: String(form.get('title')),
             durationSeconds: Number(form.get('durationSeconds') || 3600),
@@ -28,6 +40,7 @@ export function AdminMovieNewPage() {
             purchaseType: 'Lifetime',
             subscriptionEligible: true,
             isFeatured: false,
+            vimeoVideoId,
             genres: [String(form.get('genre') || 'drama')],
             license: {
               rightsHolder: String(form.get('rightsHolder') || 'AKHRA'),
@@ -44,9 +57,19 @@ export function AdminMovieNewPage() {
         <Input name="genre" placeholder="Genre slug (e.g. drama)" />
         <Input name="durationSeconds" type="number" placeholder="Duration (seconds)" />
         <Input name="priceMinorUnits" type="number" placeholder="Price in paise (5000 = ₹50)" />
+        <div>
+          <Input
+            name="vimeoVideoId"
+            placeholder="Vimeo id or URL (e.g. 1231958324 or https://vimeo.com/…)"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Used for in-app preview and playback. Set price to 0 for free Vimeo titles.
+          </p>
+        </div>
         <Input name="rightsHolder" placeholder="Rights holder" />
         <Button type="submit" disabled={mutation.isPending}>{mutation.isPending ? 'Creating…' : 'Create draft'}</Button>
       </form>
+      {formError && <p className="mt-4 text-sm text-destructive">{formError}</p>}
       {mutation.isError && <p className="mt-4 text-sm text-destructive">{(mutation.error as Error).message}</p>}
     </div>
   )

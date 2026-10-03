@@ -34,6 +34,7 @@ export const adminMovieDetailSchema = z.object({
   posterUrl: z.string().nullable().optional(),
   backdropUrl: z.string().nullable().optional(),
   trailerUrl: z.string().nullable().optional(),
+  vimeoVideoId: z.string().nullable().optional(),
   priceMinorUnits: z.number(),
   currency: z.string(),
   purchaseType: z.string(),
